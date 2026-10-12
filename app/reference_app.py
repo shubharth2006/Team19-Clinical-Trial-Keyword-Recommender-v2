@@ -4,12 +4,21 @@ import json
 import pickle
 from pathlib import Path
 import re
+import sys
 
 import numpy as np
 import pandas as pd
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
+# Streamlit may start with app/ rather than the project root on sys.path.
+# The saved model pickle refers to its class through the top-level ml package.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+# Import the model class before unpickling so the saved class reference resolves.
+from ml.mini_batch_relu_latent_factor_model import MiniBatchReLuLatentFactorModel  # noqa: F401
+
 MODEL_PATH = ROOT / "output" / "reference_model.pkl"
 VOCAB_PATH = ROOT / "output" / "mesh_vocab.json"
 
