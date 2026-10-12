@@ -1,0 +1,84 @@
+run-name: MeSH keyword reproduction (${{ github.event.inputs.dataset_rows || '55634' }} records)
+
+name: Run clinical-trial reproduction
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset_rows:
+        description: "Number of MeSH-labelled trial records to download"
+        required: true
+        default: "55634"
+        type: choice
+        options:
+          - "5000"
+          - "20000"
+          - "55634"
+
+permissions:
+  contents: read
+
+jobs:
+  reproduction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATASET_ROWS: ${{ github.event.inputs.dataset_rows || '55634' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Compile project
+        run: python -m compileall -q src ml scripts app
+      - name: Offline smoke test
+        run: python scripts/smoke_test_reference.py
+      - name: Download source records
+        run: |
+          python scripts/download_hf_sample.py \
+            --rows "$DATASET_ROWS" \
+            --out data/clinical_trials_${DATASET_ROWS}.csv \
+            --seed 42
+      - name: Train and evaluate reference-aligned model
+        run: |
+          python scripts/run_reference_model.py \
+            --input data/clinical_trials_${DATASET_ROWS}.csv \
+            --min-doc-freq 5 \
+            --max-terms 134 \
+            --epochs 5 \
+            --batch-size 10000 \
+            --seed 42
+      - name: Smoke-test recommendation CLI
+        run: python scripts/reference_recommend.py --query "Neoplasms" --top-k 3
+      - name: Smoke-test Streamlit demo
+        run: |
+          python -m streamlit run app/reference_app.py --server.headless true --server.port 8501 --server.address 127.0.0.1 > streamlit.log 2>&1 &
+          APP_PID=$!
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8501/_stcore/health; then
+              kill "$APP_PID" || true
+              exit 0
+            fi
+            sleep 2
+          done
+          cat streamlit.log
+          kill "$APP_PID" || true
+          exit 1
+      - name: Upload measured experiment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clinical-trial-reproduction-${{ github.event.inputs.dataset_rows || '55634' }}
+          if-no-files-found: error
+          path: |
+            results/reference_metrics.csv
+            results/reference_experiment.json
+            output/reference_model.pkl
+            output/mesh_vocab.json

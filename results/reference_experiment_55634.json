@@ -1,0 +1,46 @@
+{
+  "input_file": "clinical_trials_55634.csv",
+  "documents_used": 55634,
+  "vocabulary_size": 134,
+  "matrix_shape_terms_by_documents": [
+    134,
+    55634
+  ],
+  "split": {
+    "train": 44507,
+    "validation": 5563,
+    "test": 5564
+  },
+  "parameters": {
+    "tau": -0.001,
+    "k": 1000,
+    "alpha": 0.1,
+    "lambda": 0.01,
+    "epochs": 5,
+    "batch_size": 10000,
+    "seed": 42,
+    "mask_fraction": 0.8
+  },
+  "validation": {
+    "mse": 0.004814032909280294,
+    "mser": 0.004814032909280294,
+    "apk3": 0.02866210453238123,
+    "random_apk3": 0.00664484776356243
+  },
+  "test": {
+    "mse": 0.004727850867192531,
+    "mser": 0.004727850867192531,
+    "apk3": 0.027920056241839908,
+    "random_apk3": 0.004720297278296676,
+    "popularity_apk3": 0.011650095410264134
+  },
+  "training_loss": [
+    0.19330279972998268,
+    0.19201282427041627,
+    0.19143996963663956,
+    0.19112289157646653,
+    0.1909009800382346,
+    0.1907180946735157
+  ],
+  "interpretation_note": "This dataset adapter consumes pre-assigned MeSH condition/intervention terms. Results are not directly comparable with the original XML text-matching corpus."
+}

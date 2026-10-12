@@ -1,0 +1,42 @@
+name: Reference pipeline smoke test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Compile source
+        run: python -m compileall -q src ml scripts app
+      - name: Run reference-model smoke test
+        run: python scripts/smoke_test_reference.py
+      - name: Run end-to-end training on the bundled sample
+        run: |
+          python scripts/run_reference_model.py \
+            --input data/sample_trials.csv \
+            --min-doc-freq 1 \
+            --max-terms 134 \
+            --epochs 1 \
+            --batch-size 1000 \
+            --seed 42

@@ -1,0 +1,2 @@
+documents,terms,train_docs,validation_docs,test_docs,validation_mse,validation_mser,validation_apk3,validation_random_apk3,test_mse,test_mser,test_apk3,test_random_apk3,test_popularity_apk3,tau,k,alpha,lambda_reg,epochs,mask_fraction,seed
+55634,134,44507,5563,5564,0.004814032909280294,0.004814032909280294,0.02866210453238123,0.00664484776356243,0.004727850867192531,0.004727850867192531,0.027920056241839908,0.004720297278296676,0.011650095410264134,-0.001,1000.0,0.1,0.01,5,0.8,42
