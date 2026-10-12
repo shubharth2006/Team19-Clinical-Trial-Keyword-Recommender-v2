@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Local data and large downloaded files
+data/clinical_trials_*.csv
+data/raw/
+data/processed/
+*.parquet
+*.arrow
+output/
+*.pickle
+*.pkl
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/secrets.toml
